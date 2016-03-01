@@ -1,14 +1,36 @@
 $(document).on('ready page:load', ->
+  updateEvent = (event) ->
+      $.ajax({
+        url: '/events/' + event.id + '.json'
+        method: 'PUT'
+        dataType: 'json'
+        data:
+          event:
+            start: event.start._d + ''
+            end: event.end._d + ''
+      })
+      return
+
   $('#calendar').fullCalendar({
     customButtons: addEventBtn:
       text: 'Add Event'
       click: ->
           location.href = '<%= Rails.application.routes.url_helpers.new_event_path %>'
+          return
     header:
       left: 'prev,next today addEventBtn'
       center: 'title'
       right: 'month, agendaWeek, agendaDay'
     defaultView: 'agendaWeek'
-    events: '<%= Rails.application.routes.url_helpers.events_path(format: :json) %>'
+    events:
+      url: '<%= Rails.application.routes.url_helpers.events_path(format: :json) %>'
+    editable: true
+    eventResize: (event, delta, revertFunc, jsEvent, ui, view) ->
+      updateEvent(event)
+      return
+    eventDrop: (event, delta, revertFunc, jsEvent, ui, view) ->
+      updateEvent(event)
+      return
   })
+  return
 )
